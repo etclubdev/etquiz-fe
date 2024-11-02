@@ -3,7 +3,6 @@ import useLocalStorage from "../../hooks/useLocalStorageDecode";
 const Result = () => {
   const { storedData: studentInfo } = useLocalStorage("studentInfo");
   const { storedData: questionsInfo } = useLocalStorage("questions");
-  console.log(studentInfo.result);
   return (
     <div className='flex flex-col w-full max-w-[1300px] justify-center mx-auto p-5'>
       <div className='text-2xl font-bold'>Congratulations</div>

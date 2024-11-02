@@ -23,12 +23,9 @@ class Http {
         return response;
       },
       function (error: AxiosError) {
-        console.log("error", error);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any | undefined = error?.response?.data;
-        console.log("data", data);
         const message = data?.error || error?.message;
-        console.log("message", message);
         if (message) {
           toast.error(message);
         }
