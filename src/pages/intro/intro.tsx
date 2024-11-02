@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Button } from "antd";
 import Info from "../info/info";
 import useLocalStorage, { LocalStorageEventTarget } from "../../hooks/useLocalStorageDecode";

@@ -22,6 +22,7 @@ function useLocalStorage(key: string) {
   const [storedData, setStoredData] = useState(getStoredValue);
 
   // Function to set data in localStorage (with encryption)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const setValue = (value: any) => {
     try {
       const encryptedValue = btoa(AES.encrypt(JSON.stringify(value), SECRET_KEY_CRYPTO).toString());
@@ -50,4 +51,5 @@ function useLocalStorage(key: string) {
   return { storedData, setValue, reset, getStoredValue };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export default useLocalStorage;
