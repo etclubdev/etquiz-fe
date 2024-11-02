@@ -14,7 +14,6 @@ const Intro = () => {
     // Listener để cập nhật studentInfo mỗi khi setValue được gọi
     const handleStorageChange = () => {
       setStudentInfo(getStoredValue());
-      console.log("handle", studentInfo);
     };
     LocalStorageEventTarget.addEventListener("reset", handleStorageChange);
 

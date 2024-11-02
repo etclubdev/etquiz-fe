@@ -53,17 +53,13 @@ const Exam = () => {
   }, [reset, selectedAnswers]);
 
   function calculateScore(questions: Question[], savedAnswers: { [key: string]: string | null }): number {
-    console.log("savedAnswers", savedAnswers);
     let score = 0;
 
     for (const question of questions) {
       const questionId = question.question_id;
       const userAnswer = savedAnswers[questionId];
-      console.log("userAnswer", userAnswer);
-      console.log("question.correct_answer", JSON.parse(question.correct_answer));
       // Check the answer and increase the score
       if (userAnswer && userAnswer === JSON.parse(question.correct_answer)) {
-        console.log("increase score");
         score++;
       }
     }
@@ -71,7 +67,6 @@ const Exam = () => {
     return score;
   }
   const updateResult = async (mssv: string, result: number) => {
-    console.log("mssv", mssv);
     const secretKey = encryptData(mssv);
     const data = await infoApi.updateResult(
       { result },
@@ -135,7 +130,6 @@ const Exam = () => {
       setTimeout(() => {
         navigate("/result");
       }, 0);
-      console.log("All questions answered, submitting:", selectedAnswers);
     }
   };
 

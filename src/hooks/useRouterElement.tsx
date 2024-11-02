@@ -15,7 +15,6 @@ export default function useRoutesElements() {
     // Listener để cập nhật studentInfo mỗi khi setValue được gọi
     const handleStorageChange = () => {
       setStudentInfo(getStoredValue());
-      console.log("handle", studentInfo);
     };
     LocalStorageEventTarget.addEventListener("setValue", handleStorageChange);
 
