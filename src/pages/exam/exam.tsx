@@ -21,20 +21,22 @@ const Exam = () => {
     (answer: Answer) => answer.question_id === questionList[currentQuestion].question_id
   ) as Answer[];
   useEffect(() => {
-    // Khởi tạo bộ đếm ngược
+    // Initialize countdown timer
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setIsModalVisible(true);
-          return 0;
-        }
-        return prev - 1;
-      });
+      if (!isModalVisible) {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setIsModalVisible(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [isModalVisible]);
   useEffect(() => {
     // Warning on leaving the page
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -85,11 +87,15 @@ const Exam = () => {
   };
   useEffect(() => {
     if (timeLeft === 0) {
-      setTimeout(() => {
+      try {
         setIsModalVisible(true);
-        handleCalCulateScoreAndSave();
-        navigate("/result");
-      }, 5000);
+        setTimeout(() => {
+          handleCalCulateScoreAndSave();
+          navigate("/result");
+        }, 5000);
+      } catch (err) {
+        console.error(err);
+      }
     }
   }, [timeLeft, navigate, handleCalCulateScoreAndSave]);
 
@@ -123,22 +129,19 @@ const Exam = () => {
   };
 
   const handleSubmit = () => {
-    if (Object.keys(selectedAnswers).length < questionList.length) {
-      setIsModalVisible(true);
-    } else {
-      handleCalCulateScoreAndSave();
-      setTimeout(() => {
-        navigate("/result");
-      }, 0);
-    }
+    setIsModalVisible(true);
   };
 
   const handleConfirmSubmit = () => {
     setIsModalVisible(false);
-    handleCalCulateScoreAndSave();
-    setTimeout(() => {
-      navigate("/result");
-    }, 0);
+    try {
+      handleCalCulateScoreAndSave();
+      setTimeout(() => {
+        navigate("/result");
+      }, 0);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const completedQuestions = Object.keys(selectedAnswers).length;
@@ -196,13 +199,17 @@ const Exam = () => {
         </Button>
       </div>
 
-      {/* Modal xác nhận */}
-      {/* Modal xác nhận */}
       <Modal
-        title={timeLeft > 0 ? "Incomplete Questions" : "Hết thời gian"}
+        title={
+          timeLeft > 0
+            ? Object.keys(selectedAnswers).length < questionList.length
+              ? "Chưa hoàn thành câu hỏi"
+              : "Xác nhận nộp bài"
+            : "Hết thời gian"
+        }
         visible={isModalVisible}
         // onOk={timeLeft > 0 ? () => handleConfirmSubmit() : undefined}
-        // onCancel={timeLeft > 0 ? () => setIsModalVisible(false) : undefined}
+        onCancel={timeLeft > 0 ? () => setIsModalVisible(false) : undefined}
         footer={
           timeLeft > 0 ? (
             <>
@@ -216,7 +223,11 @@ const Exam = () => {
         closable={timeLeft > 0}
       >
         {timeLeft > 0 ? (
-          <p>There are unanswered questions. Are you sure you want to submit?</p>
+          Object.keys(selectedAnswers).length < questionList.length ? (
+            <p>Có một số câu hỏi chưa hoàn thành, bạn có muốn nộp bài không?</p>
+          ) : (
+            <p>Bạn đã hoàn thành tất cả câu hỏi, xác nhận nộp bài.</p>
+          )
         ) : (
           <p>Hết thời gian. Đang nộp câu trả lời của bạn bây giờ. Bạn sẽ được tự động chuyển sang trang kết quả sau 5s.</p>
         )}

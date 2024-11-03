@@ -62,6 +62,7 @@ const Intro = () => {
         visible={isModalVisible}
         onCancel={handleCancel}
         footer={null} // Remove footer to avoid "OK" and "Cancel" buttons
+        destroyOnClose
       >
         <Info /> {/* Render the Info form as modal content */}
       </Modal>
