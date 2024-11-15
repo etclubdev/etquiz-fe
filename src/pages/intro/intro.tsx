@@ -84,7 +84,7 @@ function Intro() {
           onClick={() => window.open("https://www.facebook.com/ETClub.UEH", "_blank")}
           className='text-[#00F801] text-xl sm:text-3xl font-bold animate-pulse'
         >
-          Economy Technology
+          Economic Technology
         </div>
         <div className='sm:hidden' onClick={toggleDrawer}>
           <MenuOutlined className='text-2xl text-[#C1C1C1] cursor-pointer' />
