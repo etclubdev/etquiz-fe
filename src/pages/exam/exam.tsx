@@ -260,7 +260,7 @@ const Exam = () => {
         onCancel={timeLeft > 0 ? () => setIsModalVisible(false) : undefined}
         footer={
           timeLeft > 0 ? (
-            <div className='flex items-center justify-end gap-x-3 sm: gap-x-4'>
+            <div className='flex items-center justify-end gap-x-3 sm:gap-x-4'>
               <button onClick={() => setIsModalVisible(false)} className='bg-red-500 text-white px-4 py-2 rounded-md'>
                 Cancel
               </button>
