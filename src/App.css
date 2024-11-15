@@ -2,4 +2,37 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Geist Mono", serif;
+}
+
+/* Styling for exam layout */
+body {
+  background-color: #080808;
+}
+
+button {
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.bg-111211 {
+  background-color: #111211;
+}
+
+.bg-00F801 {
+  background-color: #00F801;
+}
+
+.bg-3C3D3C {
+  background-color: #3C3D3C;
+}
+
+.bg-gray-800 {
+  background-color: #3C3D3C;
 }
