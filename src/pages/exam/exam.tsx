@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { Progress, Button, Modal } from "antd";
+import { Button, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import useLocalStorage from "../../hooks/useLocalStorageDecode";
 import { Answer, Question } from "../../types/question";
 import { encryptData } from "../../utils/encryptData";
 import infoApi from "../../apis/info.api";
-
+import "./exam.css";
 const Exam = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string | null }>({});
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(100); // 300 giây tương ứng với 5 phút
+  const [timeLeft, setTimeLeft] = useState(300); // 300 giây tương ứng với 5 phút
   const selectedAnswersRef = useRef(selectedAnswers);
   const navigate = useNavigate();
   const { storedData: studentInfo, setValue: saveStudentInfo, reset } = useLocalStorage("studentInfo");
@@ -102,7 +102,10 @@ const Exam = () => {
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    return {
+      minutes: String(minutes).padStart(2, "0"),
+      seconds: String(seconds).padStart(2, "0"),
+    };
   };
 
   const handleOptionChange = (option: string) => {
@@ -144,32 +147,50 @@ const Exam = () => {
     }
   };
 
-  const completedQuestions = Object.keys(selectedAnswers).length;
-  const completionPercentage = Math.floor((completedQuestions / questionList.length) * 100);
+  // const completedQuestions = Object.keys(selectedAnswers).length;
+  // const completionPercentage = Math.floor((completedQuestions / questionList.length) * 100);
+  const { minutes, seconds } = formatTime(timeLeft);
 
   return (
-    <div className='flex flex-col w-full max-w-[1300px] justify-center mx-auto p-5'>
+    <div className='flex flex-col w-full max-w-[1300px] mx-auto p-5' style={{ backgroundColor: "#080808" }}>
       {/* Header */}
-      <div className='flex items-center justify-between gap-4'>
-        <h1 className='text-xl font-bold'>ET QUIZ TEST</h1>
-        <Progress percent={completionPercentage} showInfo={false} strokeColor='#1890ff' />
-        <span>{studentInfo.name}</span>
-        <span>{formatTime(timeLeft)}</span>
+      <div className='flex flex-col md:flex-row items-center justify-between gap-1'>
+        <div className='text-[18px] sm:text-xl font-bold text-white'>ET QUIZ TEST</div>
+
+        {/* Timer */}
+        <div className='flex flex-col items-center bg-gray-900 rounded-lg text-white px-4 py-2'>
+          <h2 className='text-[16px] sm:text-xl font-semibold'>Time Left</h2>
+          <div className='flex items-center justify-center gap-2 mt-1 sm:mt-2'>
+            <div className='flex justify-center text-xl sm:text-2xl font-bold border border-[#00F801] rounded-lg p-2 min-w-[50px]'>
+              {minutes}
+            </div>
+            <span className='text-xl sm:text-2xl font-bold'>:</span>
+            <div className='flex justify-center text-xl sm:text-2xl font-bold border border-[#00F801] rounded-lg p-2 min-w-[50px]'>
+              {seconds}
+            </div>
+          </div>
+          <Button type='primary' onClick={handleSubmit} className='bg-[#00F801] w-full mt-1 sm:mt-2 rounded-b-lg font-bold text-black'>
+            Submit
+          </Button>
+        </div>
+
+        {/* Student Info */}
+        <div className='text-white mt-1 sm:mt-2 md:mt-0'>{studentInfo.name}</div>
       </div>
 
       {/* Body */}
-      <div className='bg-gray-300 mt-8 flex flex-col justify-center'>
-        <div className='py-7 w-full px-20 mx-auto'>
-          <h2>Câu hỏi số {currentQuestion + 1}</h2>
-          <p className='font-bold text-justify'>{questionList[currentQuestion].question}</p>
+      <div className='flex mt-4 sm:mt-8'>
+        <div className='w-full bg-gray-800 p-5 rounded-lg'>
+          <h2 className='text-white'>Câu hỏi số {currentQuestion + 1}</h2>
+          <p className='font-bold text-justify text-white'>{questionList[currentQuestion].question}</p>
           <div className='flex flex-col gap-y-3 mt-5'>
             {currentAnswers.map((option, index) => (
               <div
                 key={index}
-                className={`flex items-center justify-between py-3 px-5 border-l-4 ${
+                className={`flex items-center justify-between py-3 px-5 border border-solid border-[#00F801] ${
                   selectedAnswers[questionList[currentQuestion].question_id] === option.answer_id
-                    ? "border-l-purple-500 bg-white shadow-lg"
-                    : "border-l-transparent"
+                    ? "border-l-4 bg-white shadow-lg text-black"
+                    : " text-white"
                 }`}
                 onClick={() => handleOptionChange(option.answer_id)}
               >
@@ -183,22 +204,49 @@ const Exam = () => {
               </div>
             ))}
           </div>
+
+          {/* Navigation Buttons */}
+          <div className='flex justify-between mt-5'>
+            <Button onClick={handlePrev} disabled={currentQuestion === 0} className='bg-[#111211] text-white'>
+              Prev
+            </Button>
+            <Button onClick={handleNext} disabled={currentQuestion === questionList.length - 1} className='bg-[#111211] text-white'>
+              Next
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Nút Prev và Next */}
-      <div className='flex justify-between mt-5'>
-        <Button onClick={handlePrev} disabled={currentQuestion === 0}>
-          Prev
-        </Button>
-        <Button onClick={handleNext} disabled={currentQuestion === questionList.length - 1}>
-          Next
-        </Button>
-        <Button type='primary' onClick={handleSubmit}>
-          Submit
-        </Button>
+      {/* Scrollable Question List */}
+      {/* <div className='flex overflow-x-auto p-3 gap-4 items-center justify-center mt-8 bg-gray-800 rounded-lg'>
+        {questionList.map((_, index) => (
+          <div
+            key={index}
+            className={`w-[40px] h-[40px] rounded-full flex items-center justify-center cursor-pointer ${
+              selectedAnswers[questionList[index].question_id] ? "bg-[#00F801]" : "bg-white"
+            } ${currentQuestion === index ? "border-4 border-[#00F801]" : "hover:bg-[#00F801]"}`}
+            onClick={() => setCurrentQuestion(index)}
+          >
+            <span className={`${selectedAnswers[questionList[index].question_id] ? "text-white" : "text-black"}`}>{index + 1}</span>
+          </div>
+        ))}
+      </div> */}
+      <div className='flex overflow-x-auto gap-4 items-center justify-start mt-4 sm:mt-8 bg-gray-800 rounded-lg p-3'>
+        {questionList.map((_: unknown, index: number) => (
+          <div
+            key={index}
+            className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${
+              selectedAnswers[questionList[index].question_id] ? "bg-[#00F801]" : "bg-white"
+            } ${currentQuestion === index ? "border-4 border-[#00F801]" : "hover:bg-[#00F801]"}`}
+            onClick={() => setCurrentQuestion(index)}
+            style={{ minWidth: "40px", minHeight: "40px" }} // Ensures each item is 40x40px
+          >
+            <span className={`${selectedAnswers[questionList[index].question_id] ? "text-white" : "text-black"}`}>{index + 1}</span>
+          </div>
+        ))}
       </div>
 
+      {/* Modal */}
       <Modal
         title={
           timeLeft > 0
@@ -208,19 +256,20 @@ const Exam = () => {
             : "Hết thời gian"
         }
         visible={isModalVisible}
-        // onOk={timeLeft > 0 ? () => handleConfirmSubmit() : undefined}
+        centered
         onCancel={timeLeft > 0 ? () => setIsModalVisible(false) : undefined}
         footer={
           timeLeft > 0 ? (
-            <>
-              <button onClick={() => setIsModalVisible(false)}>Cancel</button>
-              <button onClick={() => handleConfirmSubmit()}>OK</button>
-            </>
-          ) : (
-            []
-          )
+            <div className='flex items-center justify-end gap-x-3 sm: gap-x-4'>
+              <button onClick={() => setIsModalVisible(false)} className='bg-red-500 text-white px-4 py-2 rounded-md'>
+                Cancel
+              </button>
+              <button onClick={handleConfirmSubmit} className='bg-green-500 text-white px-4 py-2 rounded-md'>
+                OK
+              </button>
+            </div>
+          ) : null
         }
-        closable={timeLeft > 0}
       >
         {timeLeft > 0 ? (
           Object.keys(selectedAnswers).length < questionList.length ? (
