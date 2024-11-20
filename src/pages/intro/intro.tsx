@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import useLocalStorage, { LocalStorageEventTarget } from "../../hooks/useLocalStorageDecode";
 import { useNavigate } from "react-router-dom";
-import { Button, Drawer, Modal } from "antd";
+import { Button, Drawer, Input, Modal } from "antd";
 import Info from "../info/info";
 import { MenuOutlined } from "@ant-design/icons"; // Icon for the hamburger menu
 
@@ -19,11 +19,17 @@ function Intro() {
   const { storedData: initialStudentInfo, getStoredValue, reset } = useLocalStorage("studentInfo");
   const [studentInfo, setStudentInfo] = useState(initialStudentInfo);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false); // State for mobile drawer
+  const [showFindResult, setShowFindResult] = useState(false);
+  const [mssv, setMssv] = useState(""); // State để lưu giá trị MSSV
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMssv(e.target.value);
+  };
   const navigate = useNavigate();
   const handleCancel = () => {
     setIsModalVisible(false);
     setShowInfoModal(false);
     setIsDrawerVisible(false);
+    setShowFindResult(false);
   };
   const handleRetake = () => {
     reset();
@@ -104,7 +110,12 @@ function Intro() {
             >
               Liên hệ
             </li>
-            <li className='hover:text-[#00F801] cursor-pointer transition-colors duration-300'>Tra cứu kết quả</li>
+            <li
+              onClick={() => setShowFindResult(!showFindResult)}
+              className='hover:text-[#00F801] cursor-pointer transition-colors duration-300'
+            >
+              Tra cứu kết quả
+            </li>
           </ul>
         </nav>
       </header>
@@ -176,6 +187,17 @@ function Intro() {
           <Button onClick={() => navigate("/result")}>Tra cứu điểm thi</Button>
           <Button onClick={handleRetake} type='primary'>
             Thi lại
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Modal for find result */}
+      <Modal title='Tra cứu điểm thi' visible={showFindResult} onCancel={handleCancel} centered footer={null} destroyOnClose>
+        <div className='flex flex-col justify-center gap-4'>
+          <div>Mã số sinh viên:</div>
+          <Input placeholder='Mã số sinh viên' className='p-2 border rounded' value={mssv} onChange={handleChange} />
+          <Button type='primary' disabled={!mssv.trim()} onClick={() => navigate("/result")}>
+            Tra cứu
           </Button>
         </div>
       </Modal>
