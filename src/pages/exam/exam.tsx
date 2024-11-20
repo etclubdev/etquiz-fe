@@ -8,7 +8,7 @@ import infoApi from "../../apis/info.api";
 import "./exam.css";
 const Exam = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string | null }>({});
+  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string[] }>({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 300 giây tương ứng với 5 phút
   const selectedAnswersRef = useRef(selectedAnswers);
@@ -54,15 +54,20 @@ const Exam = () => {
     };
   }, [reset, selectedAnswers]);
 
-  function calculateScore(questions: Question[], savedAnswers: { [key: string]: string | null }): number {
+  function calculateScore(questions: Question[], savedAnswers: { [key: string]: string[] | [] }): number {
     let score = 0;
 
     for (const question of questions) {
       const questionId = question.question_id;
       const userAnswer = savedAnswers[questionId];
-      // Check the answer and increase the score
-      if (userAnswer && userAnswer === JSON.parse(question.correct_answer)) {
-        score++;
+      const correctAnswers = JSON.parse(question.correct_answer);
+
+      if (correctAnswers.length > 1) {
+        const check = userAnswer && userAnswer.every((x) => correctAnswers.includes(x));
+        if (check) score++;
+      }
+      if (correctAnswers.length === 1) {
+        if (userAnswer && userAnswer[0] === correctAnswers[0]) score++;
       }
     }
 
@@ -81,6 +86,7 @@ const Exam = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleCalCulateScoreAndSave = async () => {
     const calculatedScore = calculateScore(questionList, selectedAnswersRef.current);
+    console.log(calculatedScore);
     studentInfo["result"] = calculatedScore;
     saveStudentInfo(studentInfo);
     await updateResult(studentInfo.mssv, calculatedScore);
@@ -106,17 +112,6 @@ const Exam = () => {
       minutes: String(minutes).padStart(2, "0"),
       seconds: String(seconds).padStart(2, "0"),
     };
-  };
-
-  const handleOptionChange = (option: string) => {
-    setSelectedAnswers({
-      ...selectedAnswers,
-      [questionList[currentQuestion].question_id]: option,
-    });
-    selectedAnswersRef.current = {
-      ...selectedAnswers,
-      [questionList[currentQuestion].question_id]: option,
-    }; // Cập nhật selectedAnswers vào ref mỗi khi thay đổi
   };
 
   const handleNext = () => {
@@ -183,26 +178,52 @@ const Exam = () => {
         <div className='w-full bg-gray-800 p-5 rounded-lg'>
           <h2 className='text-white'>Câu hỏi số {currentQuestion + 1}</h2>
           <p className='font-bold text-justify text-white'>{questionList[currentQuestion].question}</p>
+          {JSON.parse(questionList[currentQuestion].correct_answer).length > 1 && (
+            <p className='text-sm font-semibold text-yellow-400'>(Câu hỏi có nhiều đáp án)</p>
+          )}
+
           <div className='flex flex-col gap-y-3 mt-5'>
-            {currentAnswers.map((option, index) => (
-              <div
-                key={index}
-                className={`flex items-center justify-between py-3 px-5 border border-solid border-[#00F801] ${
-                  selectedAnswers[questionList[currentQuestion].question_id] === option.answer_id
-                    ? "border-l-4 bg-white shadow-lg text-black"
-                    : " text-white"
-                }`}
-                onClick={() => handleOptionChange(option.answer_id)}
-              >
-                <span>{option.answer}</span>
-                <input
-                  type='radio'
-                  name={`options-${currentQuestion}`}
-                  checked={selectedAnswers[questionList[currentQuestion].question_id] === option.answer_id}
-                  onChange={() => handleOptionChange(option.answer_id)}
-                />
-              </div>
-            ))}
+            {currentAnswers.map((option, index) => {
+              const questionId = questionList[currentQuestion].question_id;
+              const correctAnswers = JSON.parse(questionList[currentQuestion].correct_answer);
+              const isMultipleAnswers = correctAnswers.length > 1;
+              const currentSelection = selectedAnswers[questionId] || [];
+
+              const handleAnswerSelection = () => {
+                if (isMultipleAnswers) {
+                  // Xử lý checkbox (nhiều đáp án)
+                  const updatedSelection = currentSelection.includes(option.answer_id)
+                    ? currentSelection.filter((id) => id !== option.answer_id) // Bỏ đáp án nếu đã chọn
+                    : [...currentSelection, option.answer_id]; // Thêm đáp án
+                  setSelectedAnswers((prev) => ({ ...prev, [questionId]: updatedSelection }));
+                  selectedAnswersRef.current = { ...selectedAnswers, [questionId]: updatedSelection };
+                } else {
+                  // Xử lý radio (một đáp án)
+                  setSelectedAnswers((prev) => ({ ...prev, [questionId]: [option.answer_id] }));
+                  selectedAnswersRef.current = { ...selectedAnswers, [questionId]: [option.answer_id] };
+                }
+              };
+
+              const isSelected = isMultipleAnswers ? currentSelection.includes(option.answer_id) : currentSelection[0] === option.answer_id;
+
+              return (
+                <div
+                  key={index}
+                  className={`flex items-center justify-between py-3 px-5 border border-solid ${
+                    isSelected ? "border-l-4 bg-white shadow-lg text-black border-[#00F801]" : "text-white border-[#00F801]"
+                  }`}
+                  onClick={handleAnswerSelection}
+                >
+                  <span>{option.answer}</span>
+                  <input
+                    type={isMultipleAnswers ? "checkbox" : "radio"}
+                    name={`options-${currentQuestion}`}
+                    checked={isSelected}
+                    readOnly
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {/* Navigation Buttons */}
@@ -216,21 +237,6 @@ const Exam = () => {
           </div>
         </div>
       </div>
-
-      {/* Scrollable Question List */}
-      {/* <div className='flex overflow-x-auto p-3 gap-4 items-center justify-center mt-8 bg-gray-800 rounded-lg'>
-        {questionList.map((_, index) => (
-          <div
-            key={index}
-            className={`w-[40px] h-[40px] rounded-full flex items-center justify-center cursor-pointer ${
-              selectedAnswers[questionList[index].question_id] ? "bg-[#00F801]" : "bg-white"
-            } ${currentQuestion === index ? "border-4 border-[#00F801]" : "hover:bg-[#00F801]"}`}
-            onClick={() => setCurrentQuestion(index)}
-          >
-            <span className={`${selectedAnswers[questionList[index].question_id] ? "text-white" : "text-black"}`}>{index + 1}</span>
-          </div>
-        ))}
-      </div> */}
       <div className='flex overflow-x-auto gap-4 items-center justify-start mt-4 sm:mt-8 bg-gray-800 rounded-lg p-3'>
         {questionList.map((_: unknown, index: number) => (
           <div
