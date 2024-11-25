@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@font-face {
+  font-family: "UTMAVO";
+  src: url("./assets/fonts/utm-avo.woff") format("woff");
+}

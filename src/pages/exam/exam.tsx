@@ -150,7 +150,7 @@ const Exam = () => {
     <div className='flex flex-col w-full max-w-[1300px] mx-auto p-5' style={{ backgroundColor: "#080808" }}>
       {/* Header */}
       <div className='flex flex-col md:flex-row items-center justify-between gap-1'>
-        <div className='text-[18px] sm:text-xl font-bold text-white'>ET QUIZ TEST</div>
+        <div className='text-[18px] sm:text-xl font-bold text-white max-md:hidden'>QUIZ</div>
 
         {/* Timer */}
         <div className='flex flex-col items-center bg-gray-900 rounded-lg text-white px-4 py-2'>
@@ -164,13 +164,13 @@ const Exam = () => {
               {seconds}
             </div>
           </div>
-          <Button type='primary' onClick={handleSubmit} className='bg-[#00F801] w-full mt-1 sm:mt-2 rounded-b-lg font-bold text-black'>
+          <Button type='primary' onClick={handleSubmit} className=' bg-[#00F801] w-full mt-1 sm:mt-2 rounded-b-lg font-bold text-black'>
             Submit
           </Button>
         </div>
 
         {/* Student Info */}
-        <div className='text-white mt-1 sm:mt-2 md:mt-0'>{studentInfo.name}</div>
+        <div className='text-white mt-1 sm:mt-2 md:mt-0 font-bold max-md:hidden'>{studentInfo.name}</div>
       </div>
 
       {/* Body */}
