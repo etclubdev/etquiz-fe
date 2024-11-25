@@ -22,7 +22,7 @@ const Info = () => {
 
       saveStudentInfo({
         ...createdStudent.data,
-        quantity: createdStudent.data.quantity === 2 ? createdStudent.data.quantity - 1 : createdStudent.data.quantity,
+        quantity: createdStudent.data.quantity - 1,
         result: undefined,
       });
       saveQuestions(
