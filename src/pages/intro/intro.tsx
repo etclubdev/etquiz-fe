@@ -40,7 +40,6 @@ function Intro() {
     setShowFindResult(false);
   };
   const handleRetake = async () => {
-    console.log("studentInfo", studentInfo);
     if (studentInfo.quantity === 0) {
       toast.warning("Bạn đã hết lượt thi");
       return;
