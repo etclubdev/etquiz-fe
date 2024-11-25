@@ -20,7 +20,10 @@ const Info = () => {
     try {
       const [createdStudent, exam] = await Promise.all([infoApi.createInfo(values), examApi.getExam()]);
 
-      saveStudentInfo(createdStudent.data);
+      saveStudentInfo({
+        ...createdStudent.data,
+        quantity: createdStudent.data.quantity - 1,
+      });
       saveQuestions(
         exam.data.questions.map((q: Question) => ({
           ...q,
