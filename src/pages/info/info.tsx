@@ -22,7 +22,8 @@ const Info = () => {
 
       saveStudentInfo({
         ...createdStudent.data,
-        quantity: createdStudent.data.quantity - 1,
+        quantity: createdStudent.data.quantity === 2 ? createdStudent.data.quantity - 1 : createdStudent.data.quantity,
+        result: undefined,
       });
       saveQuestions(
         exam.data.questions.map((q: Question) => ({
